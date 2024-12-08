@@ -64,6 +64,7 @@ persistence:
   storageClass: standard
   accessModes:
     - ReadWriteOnce
+  storageClassName: standard
 
 
     
