@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-config
+  namespace: {{ .Release.Namespace }}
+data:
+  prometheus-datasource.yaml: |
+    {{ .Values.config.prometheusDatasource | nindent 4 }}
+  provider.yaml: |
+    {{ .Values.config.dashboardProvider | nindent 4 }}
+  grafana.ini: |
+    {{ .Values.config.grafanaIni | nindent 4 }}

@@ -1,0 +1,69 @@
+replicaCount: 1
+
+image:
+  repository: grafana/grafana
+  tag: 10.2.2
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 3000
+  loadBalancerIP: 192.168.49.110
+
+admin:
+  user: ZWtyb3Vn #ekroug # Base64: ZWtyb3Vn
+  password: MTIzNA== # 1234 # Base64: MTIzNA==
+
+config:
+  prometheusDatasource: |
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      access: proxy
+      url: http://prometheus.monitoring:9090
+      isDefault: true
+  dashboardProvider: |
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: true
+      options:
+        path: /etc/grafana/provisioning/dashboards
+  grafanaIni: |
+    [security]
+    allow_embedding = true
+    # admin_user = ekroug
+    # admin_password = 1234
+    # cookie_samesite = none
+    # cookie_secure = false
+
+    [server]
+    domain = grafana.minikube.com
+    root_url = http://grafana.minikube.com/login
+    serve_from_sub_path = true
+    allow_cross_origin = true
+
+    # [auth.basic]
+    # enabled = true
+
+    [auth.anonymous]
+    enabled = true
+    org_name = Main Org.
+    # #org_role = Viewer
+    org_role = Admin
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: standard
+  accessModes:
+    - ReadWriteOnce
+
+
+    

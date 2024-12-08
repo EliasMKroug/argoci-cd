@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-deployment
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - name: grafana
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        ports:
+        - containerPort: {{ .Values.service.targetPort }}
+        env:
+        # Extrae el usuario admin desde el secreto
+        - name: GF_SECURITY_ADMIN_USER
+          valueFrom:
+            secretKeyRef:
+              name: grafana-admin-credentials
+              key: GF_SECURITY_ADMIN_USER
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: grafana-admin-credentials
+              key: GF_SECURITY_ADMIN_PASSWORD
+        volumeMounts:
+        - name: grafana-config
+          mountPath: /etc/grafana/grafana.ini
+          subPath: grafana.ini
+        - name: grafana-datasource
+          mountPath: /etc/grafana/provisioning/datasources/prometheus-datasource.yaml
+          subPath: prometheus-datasource.yaml
+        - name: grafana-dashboard-provider
+          mountPath: /etc/grafana/provisioning/dashboards/provider.yaml
+          subPath: provider.yaml
+        # Monta el volumen persistente para datos
+        - name: grafana-data
+          mountPath: /var/lib/grafana
+      volumes:
+      - name: grafana-config
+        configMap:
+          name: grafana-config
+      - name: grafana-datasource
+        configMap:
+          name: grafana-config
+      - name: grafana-dashboard-provider
+        configMap:
+          name: grafana-config
+      # Define el volumen persistente
+      - name: grafana-data
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}
