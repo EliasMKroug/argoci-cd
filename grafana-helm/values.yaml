@@ -61,7 +61,7 @@ config:
 persistence:
   enabled: true
   size: 10Gi
-  storageClassName: standard
+  storageClass: standard
   accessModes:
     - ReadWriteOnce
 
